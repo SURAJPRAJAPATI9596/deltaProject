@@ -133,7 +133,6 @@ function Edit() {
             <label className="block mb-2 font-medium">Image URL</label>
 
             <input
-              required
               value={showValue.image}
               onChange={handleChange}
               type="text"
