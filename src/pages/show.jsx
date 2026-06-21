@@ -6,10 +6,10 @@ import axios from "axios";
 
 const Show = () => {
   const [data, setData] = useState([]);
-
-  // Review states
-  const [rating, setRating] = useState(3);
-  const [comment, setComment] = useState("");
+  const [review, setReview] = useState({
+    comment: "",
+    rating: 3,
+  });
 
   const { id } = useParams();
 
@@ -36,22 +36,26 @@ const Show = () => {
       });
   };
 
+  const handleReviewChange = (e) => {
+    const { name, value } = e.target;
+    setReview((prev) => ({ ...prev, [name]: value }));
+    console.log(review);
+  };
   const handleReview = (e) => {
     e.preventDefault();
-
-    const review = {
-      listingId: id,
-      rating,
-      comment,
-    };
-
-    console.log(review);
-
-    // later backend API
-    // axios.post("http://localhost:8080/api/reviews",review)
-
-    setRating(3);
-    setComment("");
+    axios
+      .post(`http://localhost:8080/api/listings/${id}/reviews`, review)
+      .then((response) => {
+        // /api/listings/:id/reviews
+        console.log("data submited");
+        formElement.reset();
+      })
+      .catch((error) => {
+        console.error(error);
+      })
+      .finally(() => {
+        console.log("Request completed");
+      });
   };
 
   return (
@@ -212,16 +216,17 @@ const Show = () => {
 
               <div className="mb-6">
                 <label className="block mb-2 text-gray-600">
-                  Rating : {rating} / 5
+                  rating : {review.rating}/5
                 </label>
 
                 <input
                   type="range"
+                  name="rating"
+                  value={review.rating}
                   min="1"
                   max="5"
-                  value={rating}
-                  onChange={(e) => setRating(e.target.value)}
                   className="w-full"
+                  onChange={handleReviewChange}
                 />
               </div>
 
@@ -231,8 +236,9 @@ const Show = () => {
                 <label className="block mb-2 text-gray-600">Comment</label>
 
                 <textarea
-                  value={comment}
-                  onChange={(e) => setComment(e.target.value)}
+                  name="comment"
+                  value={review.comment}
+                  onChange={handleReviewChange}
                   placeholder="Write your review..."
                   required
                   className="
