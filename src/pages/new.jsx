@@ -14,7 +14,7 @@ function New() {
     };
 
     axios
-      .post("http://localhost:8080/api/listings/new", data)
+      .post("/api/listings/new", data)
       .then((response) => {
         formElement.reset();
       })

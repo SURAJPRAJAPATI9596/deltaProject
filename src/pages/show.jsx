@@ -1,11 +1,12 @@
 import React from "react";
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { getEditData } from "../api";
+import { getShowData, getReviewData } from "../api";
 import axios from "axios";
 
 const Show = () => {
   const [data, setData] = useState([]);
+  const [showReview, setShowReview] = useState([]);
   const [review, setReview] = useState({
     comment: "",
     rating: 3,
@@ -14,23 +15,26 @@ const Show = () => {
   const { id } = useParams();
 
   useEffect(() => {
-    async function showHandle() {
-      const show = await getEditData(id);
-
+    const showHandle = async () => {
+      const show = await getShowData(id);
       setData(show);
-    }
-
+    };
     showHandle();
+  }, [id]);
+  useEffect(() => {
+    const handleShowReview = async () => {
+      const data = await getReviewData(id);
+      setShowReview(data);
+    };
+    handleShowReview();
   }, [id]);
 
   const handleForm = (e) => {
     e.preventDefault();
 
     axios
-      .delete(`http://localhost:8080/api/listings/${id}`)
-      .then((response) => {
-        console.log(id);
-      })
+      .delete(`/api/listings/${id}`)
+      .then((response) => {})
       .catch((error) => {
         console.error(error);
       });
@@ -38,23 +42,22 @@ const Show = () => {
 
   const handleReviewChange = (e) => {
     const { name, value } = e.target;
-    setReview((prev) => ({ ...prev, [name]: value }));
-    console.log(review);
+    setReview((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
+
   const handleReview = (e) => {
     e.preventDefault();
+
     axios
-      .post(`http://localhost:8080/api/listings/${id}/reviews`, review)
-      .then((response) => {
-        // /api/listings/:id/reviews
-        console.log("data submited");
-        formElement.reset();
+      .post(`/api/listings/${id}/reviews`, review)
+      .then(() => {
+        console.log("submitted");
       })
-      .catch((error) => {
-        console.error(error);
-      })
-      .finally(() => {
-        console.log("Request completed");
+      .catch((err) => {
+        console.log(err);
       });
   };
 
@@ -63,25 +66,23 @@ const Show = () => {
       className="
       min-h-screen
       bg-gray-100
-      flex
-      justify-center
       px-4
       py-10
       "
     >
       <div
         className="
-        w-full
-        max-w-4xl
+        max-w-5xl
+        mx-auto
         bg-white
         rounded-3xl
         shadow-xl
         overflow-hidden
         "
       >
-        {/* Image */}
+        {/* IMAGE */}
 
-        <div className="h-96">
+        <div className="h-75 md:h-112.5">
           <img
             src={data.image}
             alt={data.title}
@@ -93,12 +94,13 @@ const Show = () => {
           />
         </div>
 
-        {/* Content */}
+        <div className="p-5 md:p-10">
+          {/* TITLE */}
 
-        <div className="p-8">
           <h1
             className="
-            text-4xl
+            text-3xl
+            md:text-5xl
             font-bold
             mb-4
             "
@@ -109,65 +111,53 @@ const Show = () => {
           <p
             className="
             text-gray-600
-            text-lg
-            mb-6
+            text-base
+            md:text-lg
+            mb-8
             "
           >
             {data.description}
           </p>
 
+          {/* DETAILS */}
+
           <div
             className="
             grid
             grid-cols-1
+            sm:grid-cols-2
             md:grid-cols-3
             gap-5
-            mb-8
             "
           >
-            <div
-              className="
-              bg-gray-100
-              rounded-xl
-              p-4
-              "
-            >
+            <div className="bg-gray-100 p-5 rounded-xl">
               <p className="text-gray-500">Price</p>
 
               <h2 className="font-bold text-xl">₹{data.price}</h2>
             </div>
 
-            <div
-              className="
-              bg-gray-100
-              rounded-xl
-              p-4
-              "
-            >
+            <div className="bg-gray-100 p-5 rounded-xl">
               <p className="text-gray-500">Location</p>
 
               <h2 className="font-bold text-xl">{data.location}</h2>
             </div>
 
-            <div
-              className="
-              bg-gray-100
-              rounded-xl
-              p-4
-              "
-            >
+            <div className="bg-gray-100 p-5 rounded-xl">
               <p className="text-gray-500">Country</p>
 
               <h2 className="font-bold text-xl">{data.country}</h2>
             </div>
           </div>
 
-          {/* Buttons */}
+          {/* BUTTONS */}
 
           <div
             className="
             flex
+            flex-col
+            sm:flex-row
             gap-4
+            mt-8
             "
           >
             <Link
@@ -175,9 +165,10 @@ const Show = () => {
               className="
               bg-black
               text-white
-              px-6
+              px-8
               py-3
               rounded-xl
+              text-center
               "
             >
               Edit
@@ -188,9 +179,10 @@ const Show = () => {
                 className="
                 bg-red-500
                 text-white
-                px-6
+                px-8
                 py-3
                 rounded-xl
+                w-full
                 "
               >
                 Delete
@@ -198,9 +190,9 @@ const Show = () => {
             </form>
           </div>
 
-          {/* REVIEW SECTION */}
+          {/* ADD REVIEW */}
 
-          <div className="mt-10 border-t pt-8">
+          <div className="mt-12 border-t pt-10">
             <h2
               className="
               text-3xl
@@ -212,58 +204,82 @@ const Show = () => {
             </h2>
 
             <form onSubmit={handleReview}>
-              {/* Rating */}
-
               <div className="mb-6">
-                <label className="block mb-2 text-gray-600">
-                  rating : {review.rating}/5
-                </label>
+                <label className="block mb-2">Rating : {review.rating}/5</label>
 
                 <input
                   type="range"
-                  name="rating"
-                  value={review.rating}
                   min="1"
                   max="5"
+                  name="rating"
+                  value={review.rating}
+                  onChange={handleReviewChange}
                   className="w-full"
-                  onChange={handleReviewChange}
                 />
               </div>
 
-              {/* Comment */}
-
-              <div className="mb-6">
-                <label className="block mb-2 text-gray-600">Comment</label>
-
-                <textarea
-                  name="comment"
-                  value={review.comment}
-                  onChange={handleReviewChange}
-                  placeholder="Write your review..."
-                  required
-                  className="
-                  w-full
-                  h-32
-                  border
-                  rounded-xl
-                  p-4
-                  "
-                />
-              </div>
+              <textarea
+                name="comment"
+                value={review.comment}
+                onChange={handleReviewChange}
+                placeholder="Write your review..."
+                className="
+                w-full
+                h-32
+                border
+                rounded-xl
+                p-4
+                mb-5
+                "
+              />
 
               <button
                 className="
                 bg-black
                 text-white
-                px-8
+                px-10
                 py-3
                 rounded-xl
-                hover:bg-gray-800
                 "
               >
                 Submit Review
               </button>
             </form>
+          </div>
+
+          {/* ALL REVIEWS */}
+
+          <div className="mt-12 border-t pt-10">
+            <h2
+              className="
+              text-3xl
+              font-bold
+              mb-8
+              "
+            >
+              All Reviews
+            </h2>
+
+            <div
+              className="
+              grid
+              grid-cols-1
+              md:grid-cols-2
+              gap-6
+              "
+            >
+              {showReview.map((value, index) => (
+                <div className=" bg-gray-100 rounded-2xl p-6" key={value._id}>
+                  <div className="flex justify-between mb-4">
+                    <h3 className="font-bold">SURAJ PRAJAPATI</h3>
+
+                    <span>⭐ {value.rating}/5</span>
+                  </div>
+
+                  <p className="text-gray-600">{value.comment}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>

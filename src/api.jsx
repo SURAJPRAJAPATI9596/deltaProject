@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 function listingsData() {
-  return fetch("http://localhost:8080/api/listings")
+  return fetch("/api/listings")
     .then((res) => res.json())
     .then((data) => {
       return data;
@@ -9,7 +9,7 @@ function listingsData() {
 }
 
 async function getShowData(showId) {
-  return fetch(`http://localhost:8080/api/listings/${showId}`)
+  return fetch(`/api/listings/${showId}`)
     .then((res) => res.json())
     .then((data) => {
       return data;
@@ -17,7 +17,7 @@ async function getShowData(showId) {
 }
 
 async function getEditData(showId) {
-  return fetch(`http://localhost:8080/api/listings/${showId}`)
+  return fetch(`/api/listings/${showId}`)
     .then((res) => res.json())
     .then((data) => {
       return data;
@@ -25,7 +25,7 @@ async function getEditData(showId) {
 }
 
 async function deleteData(delId) {
-  return fetch(`http://localhost:8080/api/listings/${delId}`)
+  return fetch(`/api/listings/${delId}`)
     .then((res) => {
       res.json();
       console.log(delId);
@@ -35,4 +35,14 @@ async function deleteData(delId) {
     });
 }
 
-export { listingsData, getShowData, getEditData, deleteData };
+async function getReviewData(id) {
+  return fetch(`/api/listings/${id}/reviews`)
+    .then((res) => {
+      return res.json();
+    })
+    .then((data) => {
+      return data;
+    });
+}
+
+export { listingsData, getShowData, getEditData, deleteData, getReviewData };

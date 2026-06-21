@@ -30,7 +30,7 @@ function Edit() {
     const formElement = event.target;
 
     axios
-      .put(`http://localhost:8080/api/listings/${id}`, showValue)
+      .put(`/api/listings/${id}`, showValue)
       .then((response) => {
         console.log("data submited");
         formElement.reset();
